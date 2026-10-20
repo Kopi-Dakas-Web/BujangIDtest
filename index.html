@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#FFC700">
+<title>Bujang.ID — Setiap Rasa Punya Satu Cerita</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap">
+<style>
+/* ===== Bujang.ID — style.css (mobile-first) ===== */
+:root{--gold:#FFC700;--ink:#141414;--gray:#2c2c2c;--bg:#FFFBEF;--r:18px;--sh:0 6px 18px rgba(0,0,0,.12)}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+body{font-family:Poppins,system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:96px;overflow-x:hidden}
+img{max-width:100%;display:block}
+h1,h2,h3{font-weight:800;line-height:1.2}
+h2{margin:6px 0 14px;font-size:1.4rem}
+main{max-width:980px;margin:auto;padding:14px}
+.noimg{background:var(--gold);min-height:60px}
+
+/* Header */
+header{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:var(--gold);box-shadow:var(--sh)}
+.logo{height:46px;border-radius:12px;background:#fff}
+.cartbtn{position:relative;width:46px;height:46px;border:0;border-radius:14px;background:var(--ink);font-size:1.3rem;cursor:pointer}
+#badge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;border-radius:99px;background:#fff;color:var(--ink);font:800 .7rem/20px Poppins;text-align:center}
+.bump{animation:pop .3s}
+#offline{position:fixed;top:68px;left:50%;transform:translateX(-50%);z-index:45;background:var(--ink);color:var(--gold);padding:8px 16px;border-radius:99px;font-weight:600;font-size:.85rem;white-space:nowrap;animation:pop .4s both}
+
+/* Halaman */
+.page{display:none}
+.page.active{display:block;animation:rise .35s both}
+.banner{width:100%;height:auto;border-radius:var(--r);box-shadow:var(--sh);margin-bottom:14px}
+.brand{text-align:center;margin:18px 0}
+.brand h1{font-size:2.3rem}
+.brand p{font-weight:600;color:var(--gray);letter-spacing:.03em}
+.page>.btn{margin-bottom:10px}
+
+/* Carousel */
+.carousel{margin-bottom:6px}
+#track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;border-radius:var(--r);box-shadow:var(--sh)}
+#track::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:center;position:relative;aspect-ratio:1/1;max-height:380px;background:var(--gold)}
+.slide img{width:100%;height:100%;object-fit:cover}
+.slide span{position:absolute;left:12px;bottom:12px;background:var(--ink);color:var(--gold);padding:6px 14px;border-radius:99px;font-weight:600;font-size:.85rem}
+#dots{display:flex;gap:6px;justify-content:center;margin-top:10px}
+#dots i{width:8px;height:8px;border-radius:9px;background:#d8d2bf;transition:.3s}
+#dots i.on{width:22px;background:var(--ink)}
+
+/* Tombol */
+.btn{display:block;width:100%;min-height:44px;border:0;border-radius:14px;padding:12px;font:600 .9rem Poppins,sans-serif;background:var(--gold);color:var(--ink);text-align:center;text-decoration:none;cursor:pointer;transition:transform .12s,box-shadow .12s}
+.btn:active{transform:scale(.96)}
+.btn.dark{background:var(--ink);color:var(--gold)}
+.btn:disabled{opacity:.6;pointer-events:none}
+.link{border:0;background:none;color:#b00020;font:600 .8rem Poppins;text-decoration:underline;margin-bottom:8px;cursor:pointer}
+@media(hover:hover){.btn:hover{box-shadow:var(--sh);transform:translateY(-2px)}.card:hover{transform:translateY(-3px)}}
+
+/* Kartu produk */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.card{background:#fff;border-radius:var(--r);box-shadow:var(--sh);padding:10px;display:flex;flex-direction:column;gap:7px;transition:transform .2s;animation:rise .5s both;animation-delay:calc(var(--i,0)*60ms)}
+.card img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px}
+.card h3{font-size:.95rem}
+.price{font-weight:800;color:#a87400}
+.card .btn{font-size:.78rem;padding:10px 6px}
+
+/* Keranjang */
+.row{display:flex;gap:10px;align-items:center;background:#fff;border-radius:var(--r);padding:10px;margin-bottom:10px;box-shadow:var(--sh)}
+.row>img{width:72px;height:72px;object-fit:cover;border-radius:12px;flex:none}
+.info{flex:1;display:grid;gap:4px;min-width:0}
+.info small,.order small{color:#666;font-size:.8rem}
+.qty{display:flex;gap:6px}
+.qty button{width:38px;height:38px;border:0;border-radius:10px;background:var(--ink);color:var(--gold);font-size:1.2rem}
+.sub{text-align:right;display:grid;gap:6px;font-size:.9rem}
+.x{border:0;background:none;color:#b00020;font:600 .8rem Poppins}
+.sum{display:flex;justify-content:space-between;background:var(--ink);color:var(--gold);border-radius:var(--r);padding:14px;font-size:1.1rem;margin:12px 0 6px}
+.empty{text-align:center;padding:30px;color:#777}
+input:not([type=radio]),textarea{width:100%;padding:12px;border:2px solid #e5dfc9;border-radius:12px;font:400 .95rem Poppins;margin:6px 0;background:#fff}
+input:focus,textarea:focus{outline:none;border-color:var(--gold)}
+.qty input{width:68px;margin:0;text-align:center;border-color:var(--gold);font-weight:600}
+.otype{border:2px solid #e5dfc9;border-radius:14px;padding:6px 12px;margin:6px 0}
+.otype legend{padding:0 6px;font-weight:600}
+.otype label{display:block;padding:8px 0}
+.note{font-size:.8rem;color:#8a5a00;padding-bottom:6px}
+
+/* Riwayat */
+.order{margin-bottom:12px;padding:14px}
+.oh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tag{background:var(--gold);padding:2px 12px;border-radius:99px;font-size:.75rem;font-weight:600}
+.order ul{list-style:none;padding:0;display:grid;gap:4px}
+.order li{display:flex;justify-content:space-between;font-size:.9rem}
+.tot{display:flex;justify-content:space-between;border-top:1px dashed #bbb;padding-top:8px}
+.st{font-size:.8rem;color:#555}
+
+/* Footer */
+footer{background:var(--gray);color:#fff;border-radius:var(--r);padding:18px;margin-top:22px;display:grid;gap:10px;text-align:center;justify-items:center;font-size:.9rem}
+footer img{width:140px;border-radius:12px}
+footer b{color:var(--gold)}
+footer .btn{max-width:280px}
+
+/* Navigasi bawah (melayang, cocok di HP sampai desktop) */
+nav{position:fixed;bottom:8px;left:50%;transform:translateX(-50%);width:min(560px,calc(100% - 16px));display:flex;background:var(--ink);border-radius:22px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:40;box-shadow:var(--sh)}
+nav button{flex:1;border:0;background:none;color:#bbb;font:600 .68rem Poppins;padding:6px 2px;border-radius:16px;cursor:pointer;transition:.2s}
+nav button span{display:block;font-size:1.25rem}
+nav button.on{background:var(--gold);color:var(--ink)}
+
+/* Toast, loading, modal */
+#toast{position:fixed;left:50%;bottom:96px;transform:translate(-50%,20px);background:var(--ink);color:var(--gold);padding:10px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:.3s;z-index:60;max-width:90%;text-align:center;font-size:.85rem}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#loader{position:fixed;inset:0;background:var(--gold);z-index:100;display:grid;place-content:center;justify-items:center;gap:14px;transition:opacity .5s}
+#loader.hide{opacity:0;pointer-events:none}
+#loader img{width:200px;border-radius:20px;animation:pop 1s ease infinite alternate}
+#loader p{font-weight:800;font-size:1.3rem}
+.bar{width:160px;height:6px;background:rgba(0,0,0,.2);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ink);animation:load 1.2s ease-in-out infinite}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:grid;place-items:center;z-index:70;padding:16px}
+.box{background:#fff;border-radius:24px;padding:22px;max-width:420px;width:100%;display:grid;gap:10px;text-align:center;animation:pop .35s both;max-height:90vh;overflow:auto}
+.box h3{font-size:1.05rem}
+.box p{font-size:.85rem;color:#444}
+.check{width:64px;height:64px;margin:auto;border-radius:50%;background:var(--gold);display:grid;place-items:center;font-size:2rem;font-weight:800;animation:pop .5s .1s both}
+
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@keyframes pop{from{transform:scale(.85);opacity:.4}}
+@keyframes load{0%{width:0;margin-left:0}50%{width:100%;margin-left:0}100%{width:0;margin-left:100%}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Tablet & desktop */
+@media(min-width:700px){.grid{grid-template-columns:repeat(3,1fr);gap:18px}.page>.btn{max-width:360px;margin-inline:auto;margin-bottom:10px}#checkoutBox{max-width:560px}}
+
+/* ===== Bagian 2: Member & Profil ===== */
+.perk{background:var(--gold);border-radius:var(--r);padding:14px;margin-bottom:12px;font-size:.9rem;display:grid;gap:4px}
+.tabs{display:flex;gap:6px;background:#eee7cf;border-radius:14px;padding:4px;margin-bottom:8px}
+.tabs button{flex:1;border:0;border-radius:11px;padding:10px;background:none;font:600 .9rem Poppins;cursor:pointer}
+.tabs button.on{background:var(--ink);color:var(--gold)}
+.err{color:#b00020;font-size:.82rem;min-height:1.2em}
+form .btn{margin-top:8px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 16px}
+#dash h3{margin:18px 0 8px;font-size:1rem}
+#dashHead small{display:block;font-size:.75rem;font-weight:400}
+.pts{text-align:right}
+.pts b{display:block;font-size:1.8rem;line-height:1}
+.rewards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.list{list-style:none;padding:0;display:grid;gap:6px}
+.list li{display:flex;justify-content:space-between;gap:10px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:var(--sh);font-size:.9rem}
+.list li>:last-child{text-align:right;flex:none}
+.list small{display:block;color:#666;font-size:.75rem}
+.list a{color:var(--ink);font-weight:600}
+.up{color:#1a7f37}.down{color:#b00020}
+.pbox{display:grid;justify-items:center;gap:10px;margin-bottom:14px}
+.pbox .btn{max-width:200px}
+.avatar{width:120px;height:120px;border-radius:50%;background:var(--gold) center/cover;display:grid;place-items:center;font-size:3rem;font-weight:800;border:4px solid var(--ink);box-shadow:var(--sh)}
+#pfields{border:0;padding:0}
+input:disabled,input[readonly]{background:#f3efe0;color:#444}
+#profile>.btn{margin-top:10px}
+
+</style>
+<!-- SDK resmi EmailJS, lalu script.js (urutan penting) -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
+<script defer>
+/* ===== Bujang.ID — script.js =====
+   Isi: produk, navigasi, carousel, keranjang, checkout, riwayat,
+   EmailJS, WhatsApp, loading, offline.
+   Member, Profil, Poin, Reward: lihat bagian 10B. */
+'use strict';
+
+/* ---------- 1. KONFIGURASI & DATA (harga/menu diubah HANYA di sini) ---------- */
+const CONFIG = {
+  wa: '62895385540902',   // 0895385540902 dalam format internasional
+  minDelivery: 5,         // minimal total cup untuk Delivery
+  maxQty: 999,
+  schema: 1,              // naikkan angka ini saat struktur data berubah
+  emailjs: { service: 'service_47tdmcf', template: 'template_bfdtd63', key: 'Go6ujB8aeGCmXL8I9' }
+};
+const PRODUCTS = [
+  { id: 'banana',     name: 'Banana Milk Cheese', price: 15000, img: 'banana.jpg' },
+  { id: 'caramel',    name: 'Caramel Latte',      price: 15000, img: 'caramel.jpg' },
+  { id: 'manggo',     name: 'Manggo Milk Cheese', price: 15000, img: 'manggo.jpg' },
+  { id: 'pandan',     name: 'Pandan Machiato',    price: 15000, img: 'pandanmachiato.jpg' },
+  { id: 'strawberry', name: 'Strawberry Milk',    price: 15000, img: 'strawberry.jpg' },
+  { id: 'thaitea',    name: 'Thai Tea Cheese',    price: 15000, img: 'thaitea.jpg' }
+];
+const KEY = { cart: 'bujang_cart', orders: 'bujang_orders', schema: 'bujang_schema', members: 'bujang_members', session: 'bujang_session' };
+const REWARD = { perOrder: 10, cost: 100 };   // 10 poin per transaksi; 100 poin = 1 cup gratis
+
+/* ---------- 2. HELPER ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const rupiah = n => 'Rp' + String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+const findProduct = id => PRODUCTS.find(p => p.id === id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmtDate = iso => new Date(iso).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+const waLink = text => `https://wa.me/${CONFIG.wa}?text=${encodeURIComponent(text)}`;
+
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ---------- 3. LOCALSTORAGE (aman dari data rusak, ada versi skema) ---------- */
+function load(key, fallback) {
+  try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; }
+  catch { return fallback; }   // data rusak -> mulai kosong (tidak menghapus data lama)
+}
+function save(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); return true; }
+  catch { toast('Penyimpanan perangkat penuh atau dinonaktifkan.'); return false; }
+}
+// Tempat migrasi: jika nanti skema berubah, ubah data lama di sini sebelum versi dinaikkan.
+if (load(KEY.schema, 0) < CONFIG.schema) save(KEY.schema, CONFIG.schema);
+
+/* ---------- 4. KERANJANG: { idProduk: jumlahCup } ---------- */
+let cart = sanitizeCart(load(KEY.cart, {}));
+function sanitizeCart(raw) {
+  const out = {};
+  if (raw && typeof raw === 'object') {
+    for (const [id, q] of Object.entries(raw)) {
+      const n = Math.floor(Number(q));
+      if (findProduct(id) && n >= 1) out[id] = Math.min(n, CONFIG.maxQty);
+    }
+  }
+  return out;
+}
+const cartCount = () => Object.values(cart).reduce((a, b) => a + b, 0);
+const cartTotal = () => Object.entries(cart).reduce((s, [id, q]) => s + findProduct(id).price * q, 0);
+
+function addToCart(id, silent) {
+  if (!findProduct(id)) return;
+  cart[id] = Math.min((cart[id] || 0) + 1, CONFIG.maxQty);
+  save(KEY.cart, cart);
+  updateBadge();
+  if (!silent) toast('Berhasil ditambahkan ke keranjang.');
+}
+function setQty(id, value) {            // dipakai tombol +/- dan input ketik
+  const n = Math.floor(Number(value));
+  if (findProduct(id) && n >= 1) { cart[id] = Math.min(n, CONFIG.maxQty); save(KEY.cart, cart); }
+  renderCart();                          // nilai tidak valid -> kembali ke jumlah sebelumnya
+}
+function updateBadge() {
+  const b = $('#badge'), n = cartCount();
+  if (b.textContent !== String(n)) {
+    b.textContent = n;
+    b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump');
+  }
+  b.hidden = n === 0;
+}
+
+/* ---------- 5. TAMPILAN MENU & KERANJANG ---------- */
+function renderMenu() {
+  $('#menuGrid').innerHTML = PRODUCTS.map((p, i) => `
+    <article class="card" style="--i:${i}">
+      <img src="${p.img}" alt="${p.name}" loading="lazy">
+      <h3>${p.name}</h3><p class="price">${rupiah(p.price)}</p>
+      <button class="btn" data-add="${p.id}">Masukkan ke Keranjang</button>
+      <button class="btn dark" data-buy="${p.id}">Beli Langsung</button>
+    </article>`).join('');
+}
+function renderCart() {
+  const ids = Object.keys(cart);
+  $('#cartList').innerHTML = ids.length ? ids.map(id => {
+    const p = findProduct(id), q = cart[id];
+    return `<div class="row"><img src="${p.img}" alt="${p.name}">
+      <div class="info"><b>${p.name}</b><small>${rupiah(p.price)} / cup</small>
+        <div class="qty"><button data-dec="${id}" aria-label="Kurangi">−</button>
+        <input type="number" min="1" max="${CONFIG.maxQty}" inputmode="numeric" value="${q}" data-qty="${id}" aria-label="Jumlah cup">
+        <button data-inc="${id}" aria-label="Tambah">+</button></div></div>
+      <div class="sub"><b>${rupiah(p.price * q)}</b><button class="x" data-del="${id}">Hapus</button></div></div>`;
+  }).join('') : '<p class="empty">Keranjang masih kosong. Pilih minuman di menu dulu, ya.</p>';
+  updateSummary();
+}
+function updateSummary() {              // total + aturan Delivery (dipanggil setiap jumlah berubah)
+  const n = cartCount(), ok = n >= CONFIG.minDelivery;
+  updateBadge();
+  $('#checkoutBox').hidden = n === 0;
+  $('#cartCount').textContent = n + ' cup';
+  $('#total').textContent = rupiah(cartTotal());
+  $('#delLabel').hidden = !ok;          // Delivery tidak ditampilkan jika < 5 cup
+  $('#delNote').textContent = ok ? '' :
+    `Delivery tersedia mulai ${CONFIG.minDelivery} cup (sekarang ${n}). Tambah ${CONFIG.minDelivery - n} cup lagi atau pilih Pickup.`;
+  if (!ok) $('input[value=pickup]').checked = true;
+  $('#delFields').hidden = !(ok && $('input[value=delivery]').checked);
+}
+
+/* ---------- 6. CAROUSEL (satu timer, jeda saat disentuh) ---------- */
+const Carousel = {
+  idx: 0, timer: null,
+  init() {
+    this.track = $('#track'); this.dots = $('#dots');
+    this.track.innerHTML = PRODUCTS.map(p => `<div class="slide"><img src="${p.img}" alt="${p.name}"><span>${p.name}</span></div>`).join('');
+    this.dots.innerHTML = PRODUCTS.map(() => '<i></i>').join('');
+    let t;
+    this.track.addEventListener('scroll', () => {          // geser manual -> sinkronkan indikator
+      clearTimeout(t);
+      t = setTimeout(() => this.sync(), 80);
+    });
+    ['pointerdown', 'touchstart'].forEach(ev => this.track.addEventListener(ev, () => this.stop(), { passive: true }));
+    ['pointerup', 'touchend', 'pointerleave'].forEach(ev => this.track.addEventListener(ev, () => this.start(), { passive: true }));
+    this.mark();
+  },
+  sync() { this.idx = Math.round(this.track.scrollLeft / (this.track.clientWidth || 1)); this.mark(); },
+  mark() { $$('i', this.dots).forEach((d, i) => d.classList.toggle('on', i === this.idx)); },
+  next() {
+    this.idx = (this.idx + 1) % PRODUCTS.length;
+    this.track.scrollTo({ left: this.idx * this.track.clientWidth, behavior: 'smooth' });
+    this.mark();
+  },
+  start() { this.stop(); this.timer = setInterval(() => this.next(), 3000); },
+  stop() { clearInterval(this.timer); this.timer = null; }
+};
+
+/* ---------- 7. NAVIGASI (tanpa reload) ---------- */
+const PAGES = ['home', 'menu', 'cart', 'history', 'member', 'profile'];
+function go(page) {
+  if (page === 'profile' && !currentMember()) page = 'member';   // profil hanya untuk member yang login
+  if (!PAGES.includes(page)) return;
+  $$('.page').forEach(p => p.classList.toggle('active', p.id === page));
+  $$('nav button').forEach(b => b.classList.toggle('on', b.dataset.go === (page === 'profile' ? 'member' : page)));
+  if (page === 'cart') renderCart();
+  if (page === 'history') renderHistory();
+  if (page === 'member') renderMember();
+  if (page === 'profile') renderProfile();
+  if (page === 'home') { Carousel.sync(); Carousel.start(); } else Carousel.stop();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- 8. CHECKOUT ---------- */
+let busy = false;
+function setBusy(on) {
+  busy = on;
+  const b = $('#coBtn');
+  b.disabled = on;
+  b.textContent = on ? 'Memproses…' : 'Checkout';
+}
+async function checkout() {
+  if (busy) return;
+  const f = $('#orderForm');
+  const items = Object.entries(cart).map(([id, qty]) => { const p = findProduct(id); return { id, name: p.name, price: p.price, qty }; });
+  if (!items.length) return toast('Keranjang masih kosong.');
+  const qty = items.reduce((s, i) => s + i.qty, 0);
+  const total = items.reduce((s, i) => s + i.price * i.qty, 0);   // dihitung ulang dari data resmi
+  const type = f.otype.value;
+  const name = f.rname.value.trim(), phone = f.rphone.value.replace(/[\s-]/g, '');
+  if (type !== 'pickup' && type !== 'delivery') return toast('Pilih jenis pesanan dulu.');
+  if (name.length < 2) return toast('Isi nama pemesan dulu.');
+  if (!/^(\+?62|0)8\d{8,12}$/.test(phone)) return toast('Nomor HP belum valid. Contoh: 0895xxxxxxxx');
+  let address = null;
+  if (type === 'delivery') {
+    if (qty < CONFIG.minDelivery) return toast(`Delivery minimal ${CONFIG.minDelivery} cup.`);
+    const a = f.raddr.value.trim();
+    if (a.length < 10) return toast('Alamat lengkap wajib diisi (minimal 10 karakter).');
+    address = { text: a, note: f.rnote.value.trim() };
+  }
+  setBusy(true);
+  const order = {
+    id: 'BJG-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase(),
+    time: new Date().toISOString(), type, items, qty, total,
+    customer: { name, phone }, address,
+    status: 'Tercatat di perangkat ini', email: 'pending', member: currentEmail()
+  };
+  const orders = load(KEY.orders, []);
+  orders.unshift(order);
+  if (!save(KEY.orders, orders)) return setBusy(false);   // gagal simpan -> jangan klaim berhasil
+  order.pts = awardPoints(order);   // +10 poin, sekali per pesanan, hanya jika login member
+  order.email = await sendEmail(order);
+  save(KEY.orders, orders);                                // simpan status email terbaru
+  cart = {}; save(KEY.cart, cart);
+  f.reset();
+  renderCart();
+  showDone(order);
+  setBusy(false);
+}
+function showDone(o) {
+  const mail = { terkirim: 'Email ke outlet: terkirim.', gagal: 'Email ke outlet: GAGAL terkirim.', offline: 'Email ke outlet: belum terkirim (offline).' }[o.email] || '';
+  $('#doneInfo').textContent = `No. ${o.id}. Pesanan tercatat di perangkat ini. ${mail} ${o.pts ? '+' + o.pts + ' poin masuk ke akun member.' : o.member ? 'Poin belum tercatat.' : 'Masuk sebagai member untuk dapat poin.'} Pembayaran belum diverifikasi. Kirim detailnya ke sales lewat WhatsApp agar pesanan diproses.`;
+  const lines = o.items.map(i => `${i.qty} x ${i.name}`).join(', ');
+  $('#doneWa').href = waLink(`Halo Bujang.ID, saya order ${o.id}: ${lines}. Total ${rupiah(o.total)} (${o.type === 'delivery' ? 'Delivery' : 'Pickup'}). Atas nama ${o.customer.name}.`);
+  $('#done').hidden = false;
+}
+
+/* ---------- 9. EMAILJS (init sekali, kirim hanya saat checkout valid) ---------- */
+function initEmail() {
+  if (window.emailjs) emailjs.init({ publicKey: CONFIG.emailjs.key });
+}
+async function sendEmail(o) {
+  if (!navigator.onLine) return 'offline';
+  if (!window.emailjs) return 'gagal';
+  try {
+    await emailjs.send(CONFIG.emailjs.service, CONFIG.emailjs.template, {
+      order_id: o.id,
+      order_time: fmtDate(o.time),
+      order_type: o.type === 'delivery' ? 'Delivery' : 'Pickup',
+      customer_name: o.customer.name,
+      customer_phone: o.customer.phone,
+      address: o.address ? o.address.text : '-',
+      note: o.address && o.address.note ? o.address.note : '-',
+      order_items: o.items.map(i => `${i.qty} x ${i.name} (${rupiah(i.price * i.qty)})`).join(' | '),
+      total_cups: o.qty,
+      total_price: rupiah(o.total)
+    });
+    return 'terkirim';
+  } catch (err) {
+    console.error('EmailJS gagal:', err);
+    return 'gagal';
+  }
+}
+
+/* ---------- 10. RIWAYAT PESANAN ---------- */
+function renderHistory() {
+  const orders = load(KEY.orders, []);
+  const mail = { terkirim: 'terkirim', gagal: 'gagal terkirim', offline: 'belum terkirim (offline)', pending: 'belum diketahui' };
+  $('#historyList').innerHTML = orders.length ? orders.map(o => `
+    <article class="card order">
+      <div class="oh"><b>${esc(o.id)}</b><span class="tag">${o.type === 'delivery' ? 'Delivery' : 'Pickup'}</span></div>
+      <small>${fmtDate(o.time)} · a.n. ${esc(o.customer.name)}</small>
+      <ul>${o.items.map(i => `<li><span>${i.qty} × ${esc(i.name)}</span><span>${rupiah(i.price * i.qty)}</span></li>`).join('')}</ul>
+      <div class="tot"><span>Total</span><b>${rupiah(o.total)}</b></div>
+      ${o.address ? `<small>📍 ${esc(o.address.text)}${o.address.note ? ' (' + esc(o.address.note) + ')' : ''}</small>` : ''}
+      <p class="st">Status: ${esc(o.status)} · Email: ${mail[o.email] || '-'} · Pembayaran: belum diverifikasi</p>
+    </article>`).join('') : '<p class="empty">Belum ada riwayat pesanan.</p>';
+}
+
+/* ---------- 10B. MEMBER, POIN, REWARD, PROFIL (PROTOTIPE LOKAL) ----------
+   Akun tersimpan di LocalStorage perangkat ini. Password disimpan sebagai hash + salt
+   (bukan teks asli), tetapi ini BUKAN keamanan produksi. Login yang aman dan poin
+   yang tidak bisa dimanipulasi membutuhkan backend. */
+const uid = () => Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
+const members = () => load(KEY.members, {});
+const getMember = email => members()[email] || null;
+function saveMember(m) { const all = members(); all[m.email] = m; return save(KEY.members, all); }
+const currentEmail = () => load(KEY.session, null);
+function currentMember() { const e = currentEmail(); return e ? getMember(e) : null; }
+
+async function hashPass(pw, salt) {
+  const data = new TextEncoder().encode(salt + ':' + pw);
+  if (window.crypto && crypto.subtle) {
+    const buf = await crypto.subtle.digest('SHA-256', data);
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  let h = 5381;                                  // cadangan lemah jika halaman bukan HTTPS/localhost
+  for (const b of data) h = ((h << 5) + h + b) | 0;
+  return 'w' + (h >>> 0).toString(16);
+}
+
+/* --- Daftar, masuk, keluar --- */
+async function register(f) {
+  const err = $('.err', f), fail = t => { err.textContent = t; };
+  const name = f.mname.value.trim(), email = f.mmail.value.trim().toLowerCase(), pw = f.mpass.value;
+  if (name.length < 2) return fail('Nama lengkap minimal 2 huruf.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return fail('Format email belum benar.');
+  if (pw.length < 6) return fail('Password minimal 6 karakter.');
+  if (getMember(email)) return fail('Email ini sudah terdaftar. Silakan masuk.');
+  const salt = uid() + Math.random().toString(36).slice(2);
+  const m = { email, name, phone: '', salt, hash: await hashPass(pw, salt), photoRef: '', points: 0, ledger: [], redeems: [], created: new Date().toISOString() };
+  if (!saveMember(m)) return;
+  save(KEY.session, email);
+  f.reset(); fail('');
+  toast('Pendaftaran berhasil. Selamat datang di Bujang.ID!');
+  renderMember();
+}
+async function login(f) {
+  const err = $('.err', f), email = f.lmail.value.trim().toLowerCase(), m = getMember(email);
+  if (!m || await hashPass(f.lpass.value, m.salt) !== m.hash) { err.textContent = 'Email atau password salah.'; return; }
+  save(KEY.session, email);
+  f.reset(); err.textContent = '';
+  renderMember();
+}
+function logout() { save(KEY.session, null); toast('Kamu sudah keluar.'); go('member'); }
+function showTab(t) {
+  $('#regForm').hidden = t !== 'register';
+  $('#loginForm').hidden = t !== 'login';
+  $$('[data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+}
+
+/* --- Poin: satu-satunya jalan mengubah saldo; saldo tidak boleh negatif --- */
+function addLedger(m, type, delta, ref) {
+  if (m.points + delta < 0) return false;
+  m.points += delta;
+  m.ledger.unshift({ id: 'PT-' + uid(), type, delta, balance: m.points, ref, time: new Date().toISOString() });
+  return true;
+}
+// Prototipe: transaksi yang tercatat di perangkat ini dianggap layak 10 poin, sekali per ID pesanan.
+function awardPoints(order) {
+  const m = getMember(order.member);
+  if (!m || m.ledger.some(l => l.type === 'Poin transaksi' && l.ref === order.id)) return 0;
+  if (!addLedger(m, 'Poin transaksi', REWARD.perOrder, order.id) || !saveMember(m)) return 0;
+  return REWARD.perOrder;
+}
+
+/* --- Reward: 100 poin = 1 cup gratis, menu dipilih member --- */
+function redeem(productId) {
+  const m = currentMember(), p = findProduct(productId);
+  if (!m || !p) return;
+  if (m.points < REWARD.cost) return toast(`Poin belum cukup. Perlu ${REWARD.cost} poin.`);
+  const before = m.points;
+  if (!confirm(`Tukar ${REWARD.cost} poin dengan 1 cup ${p.name} gratis?\nSaldo: ${before} → ${before - REWARD.cost} poin`)) return;
+  const rid = 'RW-' + uid();
+  if (addLedger(m, 'Tukar reward', -REWARD.cost, rid)) {
+    m.redeems.unshift({ id: rid, product: p.name, time: new Date().toISOString(), before, after: m.points });
+    if (saveMember(m)) toast(`Berhasil! 1 cup ${p.name} gratis. ID ${rid}`);   // poin hanya berkurang jika tersimpan
+  }
+  renderMember();
+}
+
+const rows = (arr, fn, empty) => arr.length ? `<ul class="list">${arr.slice(0, 20).map(fn).join('')}</ul>` : `<p class="empty">${empty}</p>`;
+function renderMember() {
+  const m = currentMember();
+  $('#guest').hidden = !!m;
+  $('#dash').hidden = !m;
+  if (!m) return;
+  const trx = load(KEY.orders, []).filter(o => o.member === m.email).length;
+  $('#dashHead').innerHTML = `<div><b>${esc(m.name)}</b><small>${esc(m.email)}</small></div><div class="pts"><b>${m.points}</b><small>poin</small></div>`;
+  $('#dashStat').textContent = `${trx} transaksi tercatat. ` + (m.points >= REWARD.cost ? 'Poinmu cukup, pilih menu gratis di bawah.' : `Kurang ${REWARD.cost - m.points} poin lagi untuk 1 cup gratis.`);
+  $('#rewardList').innerHTML = PRODUCTS.map(p => `<button class="btn ${m.points >= REWARD.cost ? '' : 'dark'}" data-redeem="${p.id}">${p.name}</button>`).join('');
+  $('#ptsHistory').innerHTML = rows(m.ledger, l => `<li><span>${esc(l.type)}<small>${fmtDate(l.time)} · ${esc(l.ref)}</small></span><b class="${l.delta > 0 ? 'up' : 'down'}">${l.delta > 0 ? '+' : ''}${l.delta}<small>saldo ${l.balance}</small></b></li>`, 'Belum ada riwayat poin.');
+  $('#redeemHistory').innerHTML = rows(m.redeems, r => `<li><span>${esc(r.product)}<small>${fmtDate(r.time)} · ${esc(r.id)}</small></span><span>${r.before} → ${r.after} poin<small><a href="${waLink(`Halo Bujang.ID, saya menukar reward ${r.id}: 1 cup ${r.product} gratis. Atas nama ${m.name}.`)}" target="_blank" rel="noopener">Kirim ke sales</a></small></span></li>`, 'Belum ada penukaran reward.');
+}
+
+/* --- Foto profil: dikompres 256px; LocalStorage dulu, IndexedDB jika penuh --- */
+function idb() {
+  return new Promise((ok, no) => {
+    const r = indexedDB.open('bujang', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('photos');
+    r.onsuccess = () => ok(r.result);
+    r.onerror = () => no(r.error);
+  });
+}
+async function idbPut(k, v) {
+  const db = await idb();
+  return new Promise((ok, no) => { const t = db.transaction('photos', 'readwrite'); t.objectStore('photos').put(v, k); t.oncomplete = ok; t.onerror = () => no(t.error); });
+}
+async function idbGet(k) {
+  const db = await idb();
+  return new Promise((ok, no) => { const q = db.transaction('photos').objectStore('photos').get(k); q.onsuccess = () => ok(q.result); q.onerror = () => no(q.error); });
+}
+function compressPhoto(file) {
+  return new Promise((ok, no) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const side = Math.min(img.width, img.height), c = document.createElement('canvas'), x = c.getContext('2d');
+      c.width = c.height = 256;
+      x.fillStyle = '#fff'; x.fillRect(0, 0, 256, 256);
+      x.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, 256, 256);   // potong persegi di tengah
+      URL.revokeObjectURL(url);
+      ok(c.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); no(new Error('Gambar tidak bisa dibaca')); };
+    img.src = url;
+  });
+}
+async function storePhoto(email, data) {
+  try { localStorage.setItem('bujang_photo_' + email, data); return 'ls'; }
+  catch { await idbPut(email, data); return 'idb'; }
+}
+async function loadPhoto(m) {
+  try { return m.photoRef === 'idb' ? await idbGet(m.email) : m.photoRef === 'ls' ? localStorage.getItem('bujang_photo_' + m.email) : ''; }
+  catch { return ''; }
+}
+async function setAvatar(m) {
+  const av = $('#avatar'), src = await loadPhoto(m);
+  av.style.backgroundImage = src ? `url("${src}")` : '';
+  av.textContent = src ? '' : m.name.trim().charAt(0).toUpperCase();
+}
+async function pickPhoto(file) {
+  const m = currentMember();
+  if (!file || !m) return;
+  if (!file.type.startsWith('image/')) return toast('Pilih file gambar (JPG atau PNG).');
+  try {
+    m.photoRef = await storePhoto(m.email, await compressPhoto(file));
+    if (saveMember(m)) { toast('Foto profil diperbarui.'); setAvatar(m); }
+  } catch (err) {
+    console.error(err);
+    toast('Foto gagal disimpan. Coba gambar lain atau kosongkan ruang penyimpanan.');
+  }
+}
+
+/* --- Profil: edit, simpan, batal (batal memuat ulang data tersimpan) --- */
+function renderProfile(editing = false) {
+  const m = currentMember(), f = $('#profileForm');
+  if (!m) return;
+  f.pname.value = m.name; f.pphone.value = m.phone; f.pmail.value = m.email;
+  $('#pfields').disabled = !editing;
+  $('#pEdit').hidden = editing; $('#pSave').hidden = !editing; $('#pCancel').hidden = !editing;
+  $('.err', f).textContent = '';
+  setAvatar(m);
+  if (editing) f.pname.focus();
+}
+function saveProfile(f) {
+  const m = currentMember(), err = $('.err', f), fail = t => { err.textContent = t; };
+  if (!m) return;
+  const name = f.pname.value.trim(), phone = f.pphone.value.replace(/[\s-]/g, '');
+  if (name.length < 2) return fail('Nama lengkap minimal 2 huruf.');
+  if (phone && !/^(\+?62|0)8\d{8,12}$/.test(phone)) return fail('Nomor HP belum valid. Contoh: 0895xxxxxxxx');
+  m.name = name; m.phone = phone;
+  if (saveMember(m)) { toast('Profil tersimpan.'); renderProfile(false); }
+}
+
+/* --- Form: satu listener untuk semua form; kunci agar tidak terkirim ganda --- */
+let authBusy = false;
+document.addEventListener('submit', async e => {
+  e.preventDefault();
+  if (authBusy) return;
+  authBusy = true;
+  try {
+    const f = e.target;
+    if (f.id === 'regForm') await register(f);
+    else if (f.id === 'loginForm') await login(f);
+    else if (f.id === 'profileForm') saveProfile(f);
+  } finally { authBusy = false; }
+});
+
+/* ---------- 11. EVENT (satu listener per jenis, tidak ganda) ---------- */
+document.addEventListener('click', e => {
+  const el = e.target.closest('button');
+  if (!el) return;
+  const d = el.dataset;
+  if (d.go) go(d.go);
+  else if (d.add) addToCart(d.add);
+  else if (d.buy) { addToCart(d.buy, true); go('cart'); }
+  else if (d.inc) setQty(d.inc, (cart[d.inc] || 0) + 1);
+  else if (d.dec) setQty(d.dec, (cart[d.dec] || 0) - 1);   // minimal 1; untuk menghapus pakai "Hapus"
+  else if (d.del) { delete cart[d.del]; save(KEY.cart, cart); renderCart(); }
+  else if (d.clear !== undefined) { if (confirm('Kosongkan semua isi keranjang?')) { cart = {}; save(KEY.cart, cart); renderCart(); } }
+  else if (d.checkout !== undefined) checkout();
+  else if (d.close !== undefined) $('#done').hidden = true;
+  else if (d.tab) showTab(d.tab);
+  else if (d.logout !== undefined) logout();
+  else if (d.redeem) redeem(d.redeem);
+  else if (d.pedit !== undefined) renderProfile(true);
+  else if (d.pcancel !== undefined) renderProfile(false);
+  else if (d.pphoto !== undefined) $('#photoInput').click();
+});
+document.addEventListener('input', e => {   // ketik jumlah -> subtotal & total langsung berubah
+  const id = e.target.dataset && e.target.dataset.qty;
+  if (!id) return;
+  const n = Math.floor(Number(e.target.value));
+  if (!(n >= 1)) return;                     // kosong/0/negatif: tunggu sampai valid atau blur
+  cart[id] = Math.min(n, CONFIG.maxQty);
+  save(KEY.cart, cart);
+  $('.sub b', e.target.closest('.row')).textContent = rupiah(findProduct(id).price * cart[id]);
+  updateSummary();
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset && t.dataset.qty) setQty(t.dataset.qty, t.value);   // normalkan saat selesai mengetik
+  else if (t.name === 'otype') updateSummary();
+  else if (t.id === 'photoInput') { const file = t.files[0]; t.value = ''; pickPhoto(file); }
+});
+document.addEventListener('error', e => { if (e.target.tagName === 'IMG') e.target.classList.add('noimg'); }, true);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) Carousel.stop();
+  else if ($('#home').classList.contains('active')) Carousel.start();
+});
+
+/* ---------- 12. LOADING, OFFLINE, MULAI ---------- */
+function hideLoader() {
+  const l = $('#loader');
+  if (!l) return;
+  l.classList.add('hide');
+  setTimeout(() => l.remove(), 500);
+}
+function netStatus() { $('#offline').hidden = navigator.onLine; }   // hanya perkiraan koneksi
+
+function init() {
+  renderMenu(); Carousel.init(); renderCart(); renderHistory(); initEmail();
+  $$('[data-wa]').forEach(a => { a.href = waLink('Halo Bujang.ID, saya ingin bertanya mengenai menu dan pemesanan minuman.'); });
+  $('#orderForm').addEventListener('submit', e => e.preventDefault());
+  window.addEventListener('online', netStatus);
+  window.addEventListener('offline', netStatus);
+  netStatus();
+  go('home');
+  window.addEventListener('load', () => setTimeout(hideLoader, 800));
+  setTimeout(hideLoader, 3000);              // jaga-jaga jika gambar lambat
+}
+document.addEventListener('DOMContentLoaded', init);
+
+</script>
+</head>
+<body>
+
+<!-- Loading screen -->
+<div id="loader">
+  <img src="logo.jpg" alt="Bujang.ID">
+  <p>Selamat Datang</p>
+  <div class="bar"><i></i></div>
+</div>
+
+<header>
+  <img class="logo" src="logo.jpg" alt="Bujang.ID">
+  <button class="cartbtn" data-go="cart" aria-label="Buka keranjang">🛒<span id="badge" hidden>0</span></button>
+</header>
+<div id="offline" hidden>Yah maaf sinyal anda bermasalah :)</div>
+
+<main>
+  <!-- HALAMAN 1: HOME -->
+  <section class="page" id="home">
+    <img class="banner" src="banner.jpg" alt="Banner Bujang.ID">
+    <div class="carousel"><div id="track"></div><div id="dots"></div></div>
+    <div class="brand"><h1>Bujang.ID</h1><p>Setiap Rasa Punya Satu Cerita</p></div>
+    <button class="btn" data-go="menu">Lihat Menu</button>
+    <a class="btn dark" data-wa target="_blank" rel="noopener">💬 Tanya via WhatsApp</a>
+  </section>
+
+  <!-- HALAMAN 2: MENU -->
+  <section class="page" id="menu">
+    <h2>Menu Minuman</h2>
+    <div id="menuGrid" class="grid"></div>
+  </section>
+
+  <!-- HALAMAN 3: KERANJANG + FOOTER -->
+  <section class="page" id="cart">
+    <h2>Keranjang</h2>
+    <div id="cartList"></div>
+    <div id="checkoutBox" hidden>
+      <div class="sum"><span id="cartCount"></span><b id="total"></b></div>
+      <button class="link" data-clear>Kosongkan keranjang</button>
+      <form id="orderForm" novalidate>
+        <fieldset class="otype">
+          <legend>Jenis pesanan</legend>
+          <label><input type="radio" name="otype" value="pickup" checked> Pickup (ambil di outlet)</label>
+          <label id="delLabel"><input type="radio" name="otype" value="delivery"> Delivery</label>
+          <p id="delNote" class="note"></p>
+        </fieldset>
+        <input name="rname" placeholder="Nama pemesan / penerima" autocomplete="name" maxlength="60">
+        <input name="rphone" type="tel" placeholder="Nomor HP (contoh 0895xxxxxxxx)" autocomplete="tel" maxlength="16">
+        <div id="delFields" hidden>
+          <textarea name="raddr" rows="3" placeholder="Alamat lengkap" maxlength="250"></textarea>
+          <input name="rnote" placeholder="Patokan lokasi / catatan (opsional)" maxlength="120">
+        </div>
+        <button type="button" class="btn" id="coBtn" data-checkout>Checkout</button>
+      </form>
+    </div>
+    <footer>
+      <img src="logo.jpg" alt="Bujang.ID">
+      <p><b>Bujang.ID</b><br>Setiap Rasa Punya Satu Cerita</p>
+      <p>Sales: Rafi Taufiq · 0895385540902<br>Outlet: Payakumbuh</p>
+      <a class="btn" data-wa target="_blank" rel="noopener">💬 Chat WhatsApp Sales</a>
+    </footer>
+  </section>
+
+  <!-- HALAMAN 4: RIWAYAT -->
+  <section class="page" id="history">
+    <h2>Riwayat Pesanan</h2>
+    <div id="historyList"></div>
+  </section>
+  <!-- HALAMAN 5: MEMBER -->
+  <section class="page" id="member">
+    <div id="guest">
+      <h2>Member Bujang.ID</h2>
+      <div class="perk">
+        <b>Setiap order dapat 10 poin.</b>
+        <span>Kumpulkan 100 poin, tukar 1 cup gratis. Menunya kamu pilih sendiri dari 6 menu reguler.</span>
+      </div>
+      <div class="tabs"><button data-tab="register" class="on">Daftar</button><button data-tab="login">Masuk</button></div>
+      <form id="regForm" novalidate>
+        <input name="mname" placeholder="Nama lengkap" autocomplete="name" maxlength="60">
+        <input name="mmail" type="email" placeholder="Email" autocomplete="email" maxlength="80">
+        <input name="mpass" type="password" placeholder="Password (minimal 6 karakter)" autocomplete="new-password" maxlength="64">
+        <p class="err" role="alert"></p>
+        <button class="btn" type="submit">Daftar Member</button>
+      </form>
+      <form id="loginForm" hidden novalidate>
+        <input name="lmail" type="email" placeholder="Email" autocomplete="email" maxlength="80">
+        <input name="lpass" type="password" placeholder="Password" autocomplete="current-password" maxlength="64">
+        <p class="err" role="alert"></p>
+        <button class="btn" type="submit">Masuk</button>
+      </form>
+      <p class="note">Versi prototipe: akun dan poin tersimpan di perangkat ini saja dan tidak ikut pindah ke HP lain. Poin dicatat saat pesanan tercatat, belum bukti pembayaran.</p>
+    </div>
+    <div id="dash" hidden>
+      <div class="sum" id="dashHead"></div>
+      <p class="note" id="dashStat"></p>
+      <div class="two"><button class="btn" data-go="profile">Profil</button><button class="btn dark" data-logout>Keluar</button></div>
+      <h3>Tukar reward: 100 poin = 1 cup gratis</h3>
+      <div id="rewardList" class="rewards"></div>
+      <h3>Riwayat poin</h3>
+      <div id="ptsHistory"></div>
+      <h3>Riwayat penukaran</h3>
+      <div id="redeemHistory"></div>
+    </div>
+  </section>
+
+  <!-- HALAMAN 6: PROFIL MEMBER -->
+  <section class="page" id="profile">
+    <h2>Profil Member</h2>
+    <div class="pbox">
+      <div id="avatar" class="avatar"></div>
+      <button class="btn dark" data-pphoto>Ganti Foto</button>
+      <input type="file" id="photoInput" accept="image/*" hidden>
+    </div>
+    <form id="profileForm" novalidate>
+      <fieldset id="pfields" disabled>
+        <input name="pname" placeholder="Nama lengkap" maxlength="60" aria-label="Nama lengkap">
+        <input name="pphone" type="tel" placeholder="Nomor HP (opsional)" maxlength="16" aria-label="Nomor HP">
+        <input name="pmail" type="email" readonly aria-label="Email">
+      </fieldset>
+      <p class="err" role="alert"></p>
+      <button type="button" class="btn" id="pEdit" data-pedit>Edit Profil</button>
+      <button type="submit" class="btn" id="pSave" hidden>Simpan Perubahan</button>
+      <button type="button" class="btn dark" id="pCancel" data-pcancel hidden>Batal</button>
+    </form>
+    <button class="btn dark" data-logout>Keluar</button>
+  </section>
+</main>
+
+<nav>
+  <button data-go="home" class="on"><span>🏠</span>Home</button>
+  <button data-go="menu"><span>🥤</span>Menu</button>
+  <button data-go="cart"><span>🛒</span>Keranjang</button>
+  <button data-go="history"><span>🧾</span>Riwayat</button>
+  <button data-go="member"><span>👤</span>Member</button>
+</nav>
+
+<div id="toast" role="status"></div>
+
+<!-- Konfirmasi pesanan -->
+<div id="done" class="modal" hidden>
+  <div class="box">
+    <div class="check">✓</div>
+    <h3>Terima kasih telah order di Bujang.ID! Pesanan Anda sudah diterima.</h3>
+    <p id="doneInfo"></p>
+    <a class="btn" id="doneWa" target="_blank" rel="noopener">Kirim ke WhatsApp Sales</a>
+    <button class="btn dark" data-close>Tutup</button>
+  </div>
+</div>
+
+</body>
+</html>
